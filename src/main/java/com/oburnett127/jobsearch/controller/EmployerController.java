@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/employer")
 public class EmployerController {
     private final EmployerService service;

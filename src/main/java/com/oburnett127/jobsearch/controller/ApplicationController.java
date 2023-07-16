@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/application")
 public class ApplicationController {
     private final ApplicationService service;
