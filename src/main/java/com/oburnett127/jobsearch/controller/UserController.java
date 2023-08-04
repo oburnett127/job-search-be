@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.oburnett127.jobsearch.model.Employer;
-import com.oburnett127.jobsearch.model.User;
+import com.oburnett127.jobsearch.model.UserInfo;
 import com.oburnett127.jobsearch.model.request.AuthenticationRequest;
 import com.oburnett127.jobsearch.model.request.RegisterRequest;
 import com.oburnett127.jobsearch.model.response.AuthenticationResponse;
 import com.oburnett127.jobsearch.service.EmployerService;
-import com.oburnett127.jobsearch.service.UserService;
+import com.oburnett127.jobsearch.service.UserInfoService;
 
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -25,12 +25,12 @@ import com.oburnett127.jobsearch.service.UserService;
 @RequiredArgsConstructor
 public class UserController {
 
-  private final UserService userService;
+  private final UserInfoService userService;
   private final EmployerService employerService;
 
   @PostMapping("/signup")
   public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request) {
-    Optional<User> existingUser = userService.getUserByEmail(request.getEmail());
+    Optional<UserInfo> existingUser = userService.getUserByEmail(request.getEmail());
 
     if(existingUser.isPresent()) return ResponseEntity.status(409).body(new AuthenticationResponse(null));
 
@@ -55,9 +55,9 @@ public class UserController {
       System.out.println(empId);
     }
 
-    AuthenticationResponse response = userService.register(request, empId);
-    
-    return ResponseEntity.status(200).body(response);
+    userService.register(request, empId);
+
+    return ResponseEntity.status(200).body(null);
   }
 
   @PostMapping("/login")
@@ -68,6 +68,7 @@ public class UserController {
 
   @GetMapping("/getrole/{userId}")
   public ResponseEntity<String> getRoleByUserId(@Validated @PathVariable int userId) {
+      System.out.println("$$$$$$$$$$$$ ----------- inside getRoleByUserId");  
       final String role = userService.getRoleByUserId(userId).toString();
       return ResponseEntity.ok().body(role);
   }
@@ -80,7 +81,7 @@ public class UserController {
   }
 
   @GetMapping(value = "/getuser/{email}", produces = "application/json")
-  public ResponseEntity<User> getUserByEmail(@Validated @PathVariable String email) {
+  public ResponseEntity<UserInfo> getUserByEmail(@Validated @PathVariable String email) {
     System.out.println("$$$$$$$$$$$$ ----------- inside getUserByEmail");
     final var user = userService.getUserByEmail(email);
     return ResponseEntity.ok().body(user.get());
