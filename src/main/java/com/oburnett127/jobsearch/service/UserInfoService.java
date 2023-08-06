@@ -7,9 +7,13 @@ import com.oburnett127.jobsearch.model.response.AuthenticationResponse;
 import com.oburnett127.jobsearch.repository.UserInfoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -44,25 +48,28 @@ public class UserInfoService {
     }
 
     userRepository.save(user);
-    return "user added to system";
+    return "user added";
   }
 
   @SneakyThrows
   public AuthenticationResponse authenticate(AuthenticationRequest request) {
-    Authentication authentication = authenticationManager.authenticate(
+    try {
+      authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(
-            request.getEmail(),
-            request.getPassword()
+          request.getEmail(),
+          request.getPassword()
         )
-    );
-    
-    if(authentication.isAuthenticated()) {
+      );
+    } catch (AuthenticationException e) {
       return AuthenticationResponse.builder()
-        .token(jwtService.generateToken(request.getEmail()))
+        .token(null)
+        .message("Authentication failed")
         .build();
-    } else {
-      throw new RuntimeException("invalid user request");
     }
+    return AuthenticationResponse.builder()
+      .token(jwtService.generateToken(request.getEmail()))
+      .message("Authentication successful")
+      .build();
   }
 
   @SneakyThrows

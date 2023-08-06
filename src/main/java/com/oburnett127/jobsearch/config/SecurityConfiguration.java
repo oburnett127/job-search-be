@@ -22,9 +22,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
-@EnableWebSecurity
+@EnableWebSecurity(debug=true)
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfiguration {
@@ -35,11 +40,11 @@ public class SecurityConfiguration {
     @Bean
     //authentication
     public UserDetailsService userDetailsService() {
-//        UserDetails admin = User.withUsername("Basant")
+//        UserDetails admin = User.withUsername("admin@fake.com")
 //                .password(encoder.encode("Pwd1"))
 //                .roles("ADMIN")
 //                .build();
-//        UserDetails user = User.withUsername("John")
+//        UserDetails user = User.withUsername("john@fake.com")
 //                .password(encoder.encode("Pwd2"))
 //                .roles("USER","ADMIN","HR")
 //                .build();
@@ -50,27 +55,34 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                  .cors(Customizer.withDefaults())
-                  .csrf(AbstractHttpConfigurer::disable)
-                  .authorizeHttpRequests(auth->{
-                    auth.requestMatchers("/auth/**").permitAll()
-                            .anyRequest().authenticated();
-                    })
-                  .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                  .authenticationProvider(authenticationProvider())
-                  .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
-                  .build();
+            .cors(Customizer.withDefaults())
+            .csrf(csrf -> csrf
+                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .ignoringRequestMatchers("/csrf-token")
+            )
+            .authorizeHttpRequests(auth -> {
+                auth.requestMatchers("/auth/**", "/job/list", "/employer/list", "/csrf-token").permitAll()
+                    .anyRequest().authenticated();
+            })
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authenticationProvider(authenticationProvider())
+            .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
+            .build();
     }
+    
 
-    // @Bean
-    // CorsConfigurationSource corsConfigurationSource() {
-	//     CorsConfiguration configuration = new CorsConfiguration();
-	//     configuration.setAllowedOrigins(Arrays.asList("https://example.com"));
-	//     configuration.setAllowedMethods(Arrays.asList("GET","POST"));
-	//     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-	//     source.registerCorsConfiguration("/**", configuration);
-	//     return source;
-    // }
+    @Bean
+CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration configuration = new CorsConfiguration();
+    configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+    configuration.setAllowedHeaders(Arrays.asList("*"));
+    configuration.setAllowCredentials(true);
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+    return source;
+}
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {

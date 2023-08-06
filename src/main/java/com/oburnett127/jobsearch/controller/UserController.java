@@ -2,6 +2,8 @@ package com.oburnett127.jobsearch.controller;
 
 import lombok.RequiredArgsConstructor;
 import java.util.Optional;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -32,7 +34,7 @@ public class UserController {
   public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request) {
     Optional<UserInfo> existingUser = userService.getUserByEmail(request.getEmail());
 
-    if(existingUser.isPresent()) return ResponseEntity.status(409).body(new AuthenticationResponse(null));
+    if(existingUser.isPresent()) return ResponseEntity.status(409).body(null);
 
     int empId = 0;
 
@@ -57,13 +59,19 @@ public class UserController {
 
     userService.register(request, empId);
 
-    return ResponseEntity.status(200).body(null);
+    return ResponseEntity.ok().body(null);
   }
 
   @PostMapping("/login")
   public ResponseEntity<AuthenticationResponse> authenticate(
       @RequestBody AuthenticationRequest request) {
-      return ResponseEntity.ok(userService.authenticate(request));
+    AuthenticationResponse response = userService.authenticate(request);
+
+    if ("Authentication successful".equals(response.getMessage())) {
+      return ResponseEntity.ok(response);
+    } else {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
   }
 
   @GetMapping("/getrole/{userId}")
