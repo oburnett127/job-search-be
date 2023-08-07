@@ -65,6 +65,7 @@ public class UserController {
   @PostMapping("/login")
   public ResponseEntity<AuthenticationResponse> authenticate(
       @RequestBody AuthenticationRequest request) {
+      System.out.println("$$$$$$$$$$$$ ----------- inside authenticate");  
     AuthenticationResponse response = userService.authenticate(request);
 
     if ("Authentication successful".equals(response.getMessage())) {
