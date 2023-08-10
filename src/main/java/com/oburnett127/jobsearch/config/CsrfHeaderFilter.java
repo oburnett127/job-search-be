@@ -1,29 +1,27 @@
-package com.oburnett127.jobsearch.config;
+// package com.oburnett127.jobsearch.config;
 
-// import org.springframework.core.Ordered;
 // import org.springframework.security.web.csrf.CsrfToken;
-// import jakarta.servlet.Filter;
+// import org.springframework.stereotype.Component;
+// import org.springframework.web.filter.OncePerRequestFilter;
 // import jakarta.servlet.FilterChain;
 // import jakarta.servlet.ServletException;
-// import jakarta.servlet.ServletRequest;
-// import jakarta.servlet.ServletResponse;
+// import jakarta.servlet.http.HttpServletRequest;
 // import jakarta.servlet.http.HttpServletResponse;
 // import java.io.IOException;
 
-// public class CsrfHeaderFilter implements Filter, Ordered {
+// //Decided to use header for csrf token instead of a cookie because of the new spring security
+// //standards and to provide for protection against BREACH attacks.
+
+// @Component
+// public class CsrfHeaderFilter extends OncePerRequestFilter {
 
 //     @Override
-//     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
-//         CsrfToken csrf = (CsrfToken) req.getAttribute(CsrfToken.class.getName());
+//     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+//                                     FilterChain filterChain) throws ServletException, IOException {
+//         CsrfToken csrf = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
 //         if (csrf != null) {
-//             HttpServletResponse response = (HttpServletResponse) res;
 //             response.setHeader("X-CSRF-TOKEN", csrf.getToken());
 //         }
-//         chain.doFilter(req, res);
-//     }
-
-//     @Override
-//     public int getOrder() {
-//         return Ordered.LOWEST_PRECEDENCE - 1;
+//         filterChain.doFilter(request, response);
 //     }
 // }

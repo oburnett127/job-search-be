@@ -74,7 +74,7 @@ public class JobController {
         return ResponseEntity.ok().body(result);
     }
 
-    @PostMapping("/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Job> deleteJob(@Validated @PathVariable int id) throws IOException {
         System.out.println("inside deleteJob() $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ --------------------");
         jobService.deleteJob(id);
