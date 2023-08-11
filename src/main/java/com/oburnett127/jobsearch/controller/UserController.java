@@ -31,7 +31,7 @@ public class UserController {
   private final EmployerService employerService;
 
   @PostMapping("/signup")
-  public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request) {
+  public ResponseEntity<UserInfo> register(@RequestBody RegisterRequest request) {
     Optional<UserInfo> existingUser = userService.getUserByEmail(request.getEmail());
 
     if(existingUser.isPresent()) return ResponseEntity.status(409).body(null);
@@ -57,9 +57,9 @@ public class UserController {
       System.out.println(empId);
     }
 
-    userService.register(request, empId);
+    UserInfo user = userService.register(request, empId);
 
-    return ResponseEntity.ok().body(null);
+    return ResponseEntity.ok().body(user);
   }
 
   @PostMapping("/login")

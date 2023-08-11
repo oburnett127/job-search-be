@@ -23,7 +23,7 @@ public class UserInfoService {
   private final AuthenticationManager authenticationManager;
 
   @SneakyThrows
-  public String register(RegisterRequest request, int empId) {
+  public UserInfo register(RegisterRequest request, int empId) {
     var user = new UserInfo();
 
     if(request.getIsEmployer() == false) {
@@ -44,7 +44,7 @@ public class UserInfoService {
     }
 
     userRepository.save(user);
-    return "user added";
+    return user;
   }
 
   @SneakyThrows
@@ -60,12 +60,23 @@ public class UserInfoService {
       return AuthenticationResponse.builder()
         .token(null)
         .message("Authentication failed")
+        .user(null)
         .build();
     }
-    return AuthenticationResponse.builder()
-      .token(jwtService.generateToken(request.getEmail()))
-      .message("Authentication successful")
-      .build();
+    Optional<UserInfo> user = userRepository.findByEmail(request.getEmail());
+    if(user.isPresent()) {
+      return AuthenticationResponse.builder()
+        .token(jwtService.generateToken(request.getEmail()))
+        .message("Authentication successful")
+        .user(user.get())
+        .build();
+    } else {
+      return AuthenticationResponse.builder()
+        .token(jwtService.generateToken(request.getEmail()))
+        .message("Authentication failed")
+        .user(null)
+        .build();
+    }
   }
 
   @SneakyThrows
